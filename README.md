@@ -29,3 +29,10 @@ npm run build    # outputs dist/
 
 Every HTML page also carries schema.org JSON-LD (Person, Organization,
 project list / SoftwareApplication) and `<link rel="alternate">` to its Markdown twin.
+
+## Deploying (Coolify)
+
+The repo includes a `Dockerfile` (Node 24 build, then nginx serving `dist/`).
+In Coolify: **New Resource → Public/Private Repository** → this repo, branch `main`,
+**Build Pack: Dockerfile**, **Port: 80**, domains `https://leveluper.com,https://www.leveluper.com`.
+Every push to `main` redeploys.
