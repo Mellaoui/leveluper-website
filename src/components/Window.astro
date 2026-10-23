@@ -1,0 +1,29 @@
+---
+import Icon from './Icon.astro';
+import type { WindowDef } from '../data/site';
+
+interface Props {
+  win: WindowDef;
+}
+const { win } = Astro.props;
+---
+
+<section
+  class="win"
+  id={`win-${win.id}`}
+  data-win={win.id}
+  data-z={win.z}
+  aria-label={win.menuLabel}
+  hidden={!win.open}
+  style={`--x:${win.x}px;--y:${win.y}px;--w:${win.width}px;z-index:${10 + win.z}`}
+>
+  <header class="win-bar">
+    <span class="win-title">{win.title}</span>
+    <button class="winbtn" type="button" data-close={win.id} aria-label={`Close ${win.menuLabel}`}>
+      <Icon name="close" size={16} />
+    </button>
+  </header>
+  <div class="win-body">
+    <slot />
+  </div>
+</section>

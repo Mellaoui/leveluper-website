@@ -1,0 +1,60 @@
+---
+import { site } from '../../data/site';
+---
+
+<form class="contact" data-contact-form data-email={site.email} data-endpoint={site.contactForm.endpoint} data-key={site.contactForm.accessKey}>
+  <p>Email me at <a href={`mailto:${site.email}`}>{site.email}</a>, or send a note here.</p>
+  <label>Name
+    <input type="text" name="name" autocomplete="name" required />
+  </label>
+  <label>Email
+    <input type="email" name="email" autocomplete="email" required />
+  </label>
+  <label>Message
+    <textarea name="message" rows="4" required></textarea>
+  </label>
+  <!-- Spam trap: hidden from people, bots fill it in. -->
+  <input type="text" name="_honey" class="trap" tabindex="-1" autocomplete="off" aria-hidden="true" />
+  <button type="submit">Send</button>
+  <p class="status" role="status" aria-live="polite" hidden></p>
+</form>
+
+<style>
+  .contact {
+    padding: 22px 24px 26px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+  p { margin: 0; font-size: 15px; line-height: 1.55; }
+  label { display: flex; flex-direction: column; gap: 6px; font-size: 14px; font-weight: 500; }
+  input, textarea {
+    padding: 0 12px;
+    border: 1px solid var(--line-strong);
+    border-radius: 6px;
+    font-family: inherit;
+    font-size: 15px;
+    background: #fff;
+    color: var(--ink);
+  }
+  input { height: 44px; }
+  textarea { padding: 10px 12px; resize: vertical; }
+  input:focus-visible, textarea:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+  button {
+    height: 44px;
+    border: 0;
+    border-radius: 6px;
+    background: var(--ink);
+    color: var(--paper);
+    font-family: inherit;
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+  }
+  button:hover { background: #2c323a; }
+  button:disabled { opacity: 0.6; cursor: progress; }
+  .trap { position: absolute; left: -9999px; width: 1px; height: 1px; opacity: 0; }
+  .status { font-size: 14px; }
+  .status.is-ok { color: #1d5a33; }
+  .status.is-error { color: #9a2a1f; }
+</style>

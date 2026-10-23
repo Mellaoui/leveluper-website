@@ -1,0 +1,43 @@
+---
+import Page from '../../layouts/Page.astro';
+import StatusBadge from '../../components/StatusBadge.astro';
+import { site } from '../../data/site';
+import { getProjects, projectPath } from '../../data/projects';
+import { orgLd, personLd, projectListLd } from '../../data/agent';
+
+const base = Astro.site!;
+const projects = await getProjects();
+const description = `Every project ${site.name} has built or is building under ${site.brand}.`;
+---
+
+<Page
+  title="Projects"
+  description={description}
+  path="~/projects"
+  jsonLd={[personLd(base), orgLd(base), projectListLd(projects, base)]}
+>
+  <span slot="crumbs">/ projects</span>
+  <h1>Projects</h1>
+  <p class="muted">{description}</p>
+  <ul class="list">
+    {projects.map((p) => (
+      <li>
+        <div class="row">
+          <a href={projectPath(p)} class="name">{p.data.name}</a>
+          <StatusBadge status={p.data.status} />
+        </div>
+        <p>{p.data.summary}</p>
+      </li>
+    ))}
+  </ul>
+</Page>
+
+<style>
+  h1 { margin: 0 0 6px; font-size: 30px; line-height: 1.15; font-weight: 600; letter-spacing: -0.5px; }
+  p { margin: 0; }
+  .list { list-style: none; margin: 24px 0 0; padding: 0; border-top: 1px solid var(--line-soft); }
+  .list li { padding: 16px 0; border-bottom: 1px solid var(--line-soft); display: flex; flex-direction: column; gap: 4px; }
+  .row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+  .name { font-size: 18px; font-weight: 600; color: var(--ink); }
+  .list p { font-size: 15px; }
+</style>

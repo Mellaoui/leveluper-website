@@ -1,0 +1,68 @@
+---
+import { getProjects, projectPath } from '../../data/projects';
+import StatusBadge from '../StatusBadge.astro';
+
+const projects = await getProjects();
+---
+
+<div class="grid">
+  {projects.map((p) => (
+    <article class="card">
+      <div class="card-head">
+        <h2><a href={projectPath(p)} class="name">{p.data.name}</a></h2>
+        <StatusBadge status={p.data.status} />
+      </div>
+      <p>{p.data.summary}</p>
+      {p.data.cta
+        ? <a href={p.data.cta.href} class="cta">{p.data.cta.label}</a>
+        : <a href={projectPath(p)} class="cta">Details →</a>}
+    </article>
+  ))}
+  <button type="button" class="card card-link lab" data-open="now">
+    <span class="lab-title">More in the lab</span>
+    <span class="muted">New projects appear here once they have a waitlist. See what I’m building now.</span>
+    <span class="cta accent-link">Open now.md →</span>
+  </button>
+</div>
+<p class="all"><a href="/projects/">All projects</a> · <a href="/projects.json" class="mono">projects.json</a></p>
+
+<style>
+  .grid {
+    padding: 24px 24px 12px;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+  }
+  .card {
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 20px;
+    background: #fff;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    font-size: 15px;
+    line-height: 1.55;
+  }
+  .card-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+  h2 { margin: 0; font-size: 20px; font-weight: 600; }
+  .name { color: var(--ink); text-decoration: none; }
+  .name:hover { text-decoration: underline; }
+  p { margin: 0; }
+  .cta { margin-top: auto; font-weight: 500; }
+  .lab {
+    border: 1px dashed var(--line-strong);
+    background: transparent;
+    text-align: left;
+    font-family: inherit;
+    color: var(--ink);
+    cursor: pointer;
+  }
+  .lab-title { font-size: 18px; font-weight: 600; }
+  .accent-link { color: var(--link); }
+  .all { margin: 0; padding: 0 24px 20px; font-size: 14px; }
+  .all .mono { font-size: 13px; }
+  @media (max-width: 560px) {
+    .grid { grid-template-columns: 1fr; }
+  }
+</style>

@@ -1,0 +1,28 @@
+---
+import { now } from '../../data/site';
+---
+
+<div class="now">
+  <p class="mono muted updated">Updated {now.updated}</p>
+  {now.items.map((item) => (
+    <div class="item">
+      <h2>{item.heading}</h2>
+      <p>{item.body}</p>
+    </div>
+  ))}
+</div>
+
+<style>
+  .now {
+    padding: 22px 24px 26px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    font-size: 15px;
+    line-height: 1.55;
+  }
+  .updated { font-size: 12px; }
+  .item { display: flex; flex-direction: column; gap: 4px; }
+  h2 { margin: 0; font-size: 15px; font-weight: 600; }
+  p { margin: 0; }
+</style>

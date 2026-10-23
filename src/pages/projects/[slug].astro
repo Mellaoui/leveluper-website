@@ -1,0 +1,67 @@
+---
+import Page from '../../layouts/Page.astro';
+import StatusBadge from '../../components/StatusBadge.astro';
+import { render } from 'astro:content';
+import { getProjects, isoDate, projectMdPath, type Project } from '../../data/projects';
+import { orgLd, personLd, projectLd } from '../../data/agent';
+
+export async function getStaticPaths() {
+  const projects = await getProjects();
+  return projects.map((project) => ({ params: { slug: project.id }, props: { project } }));
+}
+
+const { project } = Astro.props as { project: Project };
+const d = project.data;
+const base = Astro.site!;
+const { Content } = await render(project);
+---
+
+<Page
+  title={d.name}
+  description={d.summary}
+  path={`~/projects/${project.id}`}
+  markdown={projectMdPath(project)}
+  jsonLd={[personLd(base), orgLd(base), projectLd(project, base)]}
+>
+  <Fragment slot="crumbs"><span>/</span><a href="/projects/">projects</a><span>/ {project.id}</span></Fragment>
+  <div class="head">
+    <h1>{d.name}</h1>
+    <StatusBadge status={d.status} />
+  </div>
+  <p class="summary">{d.summary}</p>
+
+  <dl class="facts">
+    {d.category && <><dt>Category</dt><dd>{d.category}</dd></>}
+    {d.url && <><dt>Website</dt><dd><a href={d.url}>{d.url.replace(/^https?:\/\//, '')}</a></dd></>}
+    {d.repo && <><dt>Source</dt><dd><a href={d.repo}>{d.repo.replace(/^https?:\/\//, '')}</a></dd></>}
+    {d.stack.length > 0 && <><dt>Stack</dt><dd>{d.stack.join(', ')}</dd></>}
+    {d.started && <><dt>Started</dt><dd><time datetime={isoDate(d.started)}>{isoDate(d.started)}</time></dd></>}
+    <dt>Updated</dt><dd><time datetime={isoDate(d.updated)}>{isoDate(d.updated)}</time></dd>
+  </dl>
+
+  <div class="prose"><Content /></div>
+
+  {d.cta && <p><a href={d.cta.href} class="cta">{d.cta.label}</a></p>}
+</Page>
+
+<style>
+  .head { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+  h1 { margin: 0; font-size: 30px; line-height: 1.15; font-weight: 600; letter-spacing: -0.5px; }
+  .summary { margin: 8px 0 0; font-size: 18px; color: var(--muted); }
+  .facts {
+    display: grid;
+    grid-template-columns: max-content 1fr;
+    gap: 6px 20px;
+    margin: 22px 0;
+    padding: 16px 0;
+    border-top: 1px solid var(--line-soft);
+    border-bottom: 1px solid var(--line-soft);
+    font-size: 14px;
+  }
+  dt { font-family: var(--font-mono); font-size: 12px; color: var(--muted); padding-top: 2px; }
+  dd { margin: 0; }
+  .prose :global(h2) { margin: 24px 0 6px; font-size: 18px; font-weight: 600; }
+  .prose :global(p) { margin: 0 0 12px; }
+  .prose :global(ul) { margin: 0 0 12px; padding-left: 20px; }
+  .cta { font-weight: 500; }
+</style>

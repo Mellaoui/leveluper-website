@@ -1,0 +1,87 @@
+---
+import Base from '../layouts/Base.astro';
+import Icon from '../components/Icon.astro';
+import Window from '../components/Window.astro';
+import About from '../components/windows/About.astro';
+import Projects from '../components/windows/Projects.astro';
+import Writing from '../components/windows/Writing.astro';
+import Now from '../components/windows/Now.astro';
+import Contact from '../components/windows/Contact.astro';
+import { site, windows } from '../data/site';
+import { getProjects } from '../data/projects';
+import { orgLd, personLd, projectListLd, projectLd } from '../data/agent';
+
+const content = { about: About, projects: Projects, writing: Writing, now: Now, contact: Contact };
+const base = Astro.site!;
+const projects = await getProjects();
+const jsonLd = [personLd(base), orgLd(base), projectListLd(projects, base), ...projects.map((p) => projectLd(p, base))];
+const front = windows.filter((w) => w.open).sort((a, b) => b.z - a.z)[0]?.id;
+---
+
+<Base jsonLd={jsonLd} markdown="/llms.txt">
+  <main class="desktop">
+    <div class="bigmark" aria-hidden="true">leveluper</div>
+
+    <nav class="icons" aria-label="Desktop">
+      {windows.map((w) => (
+        <button class="dicon" type="button" data-open={w.id}>
+          <span class="dicon-tile"><Icon name={w.icon} /></span>
+          {w.iconLabel}
+        </button>
+      ))}
+    </nav>
+
+    {windows.map((w) => {
+      const Content = content[w.id];
+      return (
+        <Window win={w}>
+          <Content />
+        </Window>
+      );
+    })}
+
+    <div class="start-menu" id="start-menu" role="menu" aria-label="Start menu" hidden>
+      <div class="start-head">
+        <p class="start-name">{site.name}</p>
+        <p class="start-domain mono">{site.domain}</p>
+      </div>
+      {windows.map((w) => (
+        <button class="smitem" type="button" role="menuitem" data-open={w.id}>{w.menuLabel}</button>
+      ))}
+    </div>
+
+    <footer class="taskbar">
+      <button
+        class="tbtn start-btn"
+        type="button"
+        id="start-btn"
+        aria-label="Open start menu"
+        aria-expanded="false"
+        aria-controls="start-menu"
+      >
+        <span class="logo" aria-hidden="true">LU</span>
+        <span class="tb-label">{site.brand}</span>
+      </button>
+      <div class="tb-sep" aria-hidden="true"></div>
+      <div class="tasks">
+        {windows.map((w) => (
+          <button
+            class:list={['tbtn', 'task', { 'is-front': w.id === front }]}
+            type="button"
+            data-task={w.id}
+            data-open={w.id}
+            hidden={!w.open}
+          >
+            {w.label}
+          </button>
+        ))}
+      </div>
+      <span class="clock" id="clock">--:--</span>
+    </footer>
+  </main>
+</Base>
+
+<script>
+  import { initDesktop } from '../scripts/desktop';
+  initDesktop();
+</script>
