@@ -69,6 +69,50 @@ export function initDesktop() {
     });
   });
 
+  // Drag windows by their title bar. On small screens windows are full width, so no dragging.
+  const desktop = document.querySelector<HTMLElement>('.desktop')!;
+  const mobile = window.matchMedia('(max-width: 760px)');
+  const TASKBAR = 52;
+  const GRIP = 80; // px of title bar that must stay on screen
+
+  // Keep enough of the title bar visible to grab it again.
+  function place(el: HTMLElement, x: number, y: number) {
+    const maxX = desktop.clientWidth - GRIP;
+    const maxY = desktop.clientHeight - TASKBAR - 44;
+    el.style.setProperty('--x', `${Math.round(Math.min(Math.max(x, GRIP - el.offsetWidth), maxX))}px`);
+    el.style.setProperty('--y', `${Math.round(Math.min(Math.max(y, 0), maxY))}px`);
+  }
+
+  wins.forEach((el, id) => {
+    const bar = el.querySelector<HTMLElement>('.win-bar')!;
+    bar.addEventListener('pointerdown', (e) => {
+      if (mobile.matches || e.button !== 0 || (e.target as HTMLElement).closest('button')) return;
+      e.preventDefault();
+      if (zOf(el) !== top) openWin(id);
+      const startX = e.clientX - el.offsetLeft;
+      const startY = e.clientY - el.offsetTop;
+      bar.setPointerCapture(e.pointerId);
+      el.classList.add('is-dragging');
+
+      const move = (ev: PointerEvent) => place(el, ev.clientX - startX, ev.clientY - startY);
+      const end = () => {
+        el.classList.remove('is-dragging');
+        bar.removeEventListener('pointermove', move);
+        bar.removeEventListener('pointerup', end);
+        bar.removeEventListener('pointercancel', end);
+      };
+      bar.addEventListener('pointermove', move);
+      bar.addEventListener('pointerup', end);
+      bar.addEventListener('pointercancel', end);
+    });
+  });
+
+  // Pull windows back on screen if the browser gets smaller.
+  window.addEventListener('resize', () => {
+    if (mobile.matches) return;
+    wins.forEach((el) => !el.hidden && place(el, el.offsetLeft, el.offsetTop));
+  });
+
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape' && !startMenu.hidden) {
       setStart(false);

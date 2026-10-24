@@ -7,7 +7,7 @@ url: https://verifeye.leveluper.com
 cta:
   label: Visit Verifeye →
   href: https://verifeye.leveluper.com
-stack: [Laravel, Inertia.js, Livewire, Laravel Octane, Laravel Reverb, Docker]
+stack: [Laravel, Docker]
 tags: [vehicles, verification, photos]
 updated: 2026-10-24
 order: 1

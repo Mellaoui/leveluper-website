@@ -1,20 +1,22 @@
 ---
 import Base from '../layouts/Base.astro';
-import Icon from '../components/Icon.astro';
+import DesktopIcon from '../components/DesktopIcon.astro';
 import Window from '../components/Window.astro';
 import About from '../components/windows/About.astro';
 import Projects from '../components/windows/Projects.astro';
 import Writing from '../components/windows/Writing.astro';
-import Now from '../components/windows/Now.astro';
+import Journey from '../components/windows/Journey.astro';
 import Contact from '../components/windows/Contact.astro';
 import { site, windows } from '../data/site';
 import { getProjects } from '../data/projects';
+import { getJourney } from '../data/journey';
 import { orgLd, personLd, projectListLd, projectLd } from '../data/agent';
 
-const content = { about: About, projects: Projects, writing: Writing, now: Now, contact: Contact };
+const content = { about: About, projects: Projects, writing: Writing, journey: Journey, contact: Contact };
 const base = Astro.site!;
 const projects = await getProjects();
-const jsonLd = [personLd(base), orgLd(base), projectListLd(projects, base), ...projects.map((p) => projectLd(p, base))];
+const roles = await getJourney();
+const jsonLd = [personLd(base, roles), orgLd(base), projectListLd(projects, base), ...projects.map((p) => projectLd(p, base))];
 const front = windows.filter((w) => w.open).sort((a, b) => b.z - a.z)[0]?.id;
 ---
 
@@ -25,7 +27,7 @@ const front = windows.filter((w) => w.open).sort((a, b) => b.z - a.z)[0]?.id;
     <nav class="icons" aria-label="Desktop">
       {windows.map((w) => (
         <button class="dicon" type="button" data-open={w.id}>
-          <span class="dicon-tile"><Icon name={w.icon} /></span>
+          <span class="dicon-tile"><DesktopIcon name={w.icon} /></span>
           {w.iconLabel}
         </button>
       ))}

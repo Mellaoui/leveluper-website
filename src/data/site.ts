@@ -37,14 +37,14 @@ export const about = {
   ],
 };
 
-export type WindowId = 'about' | 'projects' | 'writing' | 'now' | 'contact';
+export type WindowId = 'about' | 'projects' | 'writing' | 'journey' | 'contact';
 
 export interface WindowDef {
   id: WindowId;
   title: string; // shown in the window title bar
   label: string; // shown on the taskbar
   menuLabel: string; // shown in the start menu
-  icon: 'user' | 'folder' | 'doc' | 'pulse' | 'mail';
+  icon: 'user' | 'folder' | 'doc' | 'journey' | 'mail';
   iconLabel: string; // shown under the desktop icon
   x: number;
   y: number;
@@ -57,7 +57,7 @@ export const windows: WindowDef[] = [
   { id: 'about', title: '~/about.md', label: 'about.md', menuLabel: 'About', icon: 'user', iconLabel: 'about.md', x: 180, y: 48, width: 580, open: true, z: 3 },
   { id: 'projects', title: '~/projects', label: 'projects', menuLabel: 'Projects', icon: 'folder', iconLabel: 'Projects', x: 300, y: 110, width: 620, open: false, z: 1 },
   { id: 'writing', title: '~/writing', label: 'writing', menuLabel: 'Writing', icon: 'doc', iconLabel: 'Writing', x: 420, y: 80, width: 560, open: false, z: 1 },
-  { id: 'now', title: '~/now.md', label: 'now.md', menuLabel: 'Now', icon: 'pulse', iconLabel: 'now.md', x: 820, y: 140, width: 400, open: true, z: 2 },
+  { id: 'journey', title: '~/journey.md', label: 'journey.md', menuLabel: 'Journey', icon: 'journey', iconLabel: 'journey.md', x: 800, y: 72, width: 480, open: true, z: 2 },
   { id: 'contact', title: '~/contact', label: 'contact', menuLabel: 'Contact', icon: 'mail', iconLabel: 'Contact', x: 560, y: 170, width: 440, open: false, z: 1 },
 ];
 
@@ -73,6 +73,9 @@ export interface Post {
 // Add posts here; the Writing window shows "No posts yet" while this is empty.
 export const posts: Post[] = [];
 
+// Roles live in src/content/journey/*.md (one file per role).
+
+// Shown as "Currently" at the top of the Journey window.
 export const now = {
   updated: 'October 2026',
   items: [

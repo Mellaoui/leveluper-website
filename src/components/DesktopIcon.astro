@@ -1,0 +1,19 @@
+---
+// Colour desktop icons from Microsoft's Fluent Emoji (MIT): github.com/microsoft/fluentui-emoji
+import User from '../assets/icons/user.svg';
+import Folder from '../assets/icons/folder.svg';
+import Doc from '../assets/icons/doc.svg';
+import Journey from '../assets/icons/journey.svg';
+import Mail from '../assets/icons/mail.svg';
+import type { WindowDef } from '../data/site';
+
+interface Props {
+  name: WindowDef['icon'];
+  size?: number;
+}
+const { name, size = 44 } = Astro.props;
+const icons = { user: User, folder: Folder, doc: Doc, journey: Journey, mail: Mail };
+const Svg = icons[name];
+---
+
+<Svg width={size} height={size} aria-hidden="true" />

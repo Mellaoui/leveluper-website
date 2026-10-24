@@ -2,12 +2,31 @@
 // Markdown (llms.txt, per-project .md), JSON and schema.org JSON-LD.
 import { about, now, site, socials } from './site';
 import { isoDate, projectMdPath, projectPath, statusLabels, type Project } from './projects';
+import { roleDates, roleDuration, roleLocation, type Role } from './journey';
 
 const abs = (base: URL, path: string) => new URL(path, base).href;
 const realSocials = () => socials.filter((s) => s.href.startsWith('http'));
 
 export function aboutMarkdown() {
   return [`${about.role} — ${about.focus.join(', ')}.`, ...about.paragraphs].join('\n\n');
+}
+
+const currentlyMarkdown = () => now.items.map((i) => `- ${i.heading}: ${i.body}`).join('\n');
+
+// One line per role, for llms.txt.
+const roleLine = (r: Role) =>
+  `- ${r.data.title}, ${r.data.company} (${r.data.type}, ${roleDates(r)}, ${roleLocation(r)}): ${r.data.summary}`;
+
+function roleMarkdown(r: Role) {
+  return [
+    `### ${r.data.title} — ${r.data.company}`,
+    `${r.data.type} · ${roleDates(r)} (${roleDuration(r)}) · ${roleLocation(r)}`,
+    r.data.summary,
+    r.data.tags.length ? `Skills: ${r.data.tags.join(', ')}` : '',
+    (r.body ?? '').trim(),
+  ]
+    .filter(Boolean)
+    .join('\n\n');
 }
 
 export function projectMeta(p: Project) {
@@ -36,7 +55,7 @@ export function projectMarkdown(p: Project, base: URL) {
     .join('\n\n') + '\n';
 }
 
-export function llmsTxt(projects: Project[], base: URL) {
+export function llmsTxt(projects: Project[], roles: Role[], base: URL) {
   return [
     `# ${site.brand}`,
     `> ${site.description}`,
@@ -46,25 +65,29 @@ export function llmsTxt(projects: Project[], base: URL) {
     projects
       .map((p) => `- [${p.data.name}](${abs(base, projectMdPath(p))}): ${p.data.summary} Status: ${statusLabels[p.data.status]}.`)
       .join('\n'),
-    `## Now (updated ${now.updated})`,
-    now.items.map((i) => `- ${i.heading}: ${i.body}`).join('\n'),
+    `## Currently (updated ${now.updated})`,
+    currentlyMarkdown(),
+    `## Journey`,
+    roles.map(roleLine).join('\n'),
     `## Contact`,
     [`- Email: ${site.email}`, ...realSocials().map((s) => `- ${s.label}: ${s.href}`)].join('\n'),
     `## Optional`,
     [
-      `- [Full content in one file](${abs(base, '/llms-full.txt')}): about, now and every project page`,
+      `- [Full content in one file](${abs(base, '/llms-full.txt')}): about, journey and every project page`,
       `- [Projects as JSON](${abs(base, '/projects.json')}): structured list of all projects`,
       `- [Sitemap](${abs(base, '/sitemap.xml')})`,
     ].join('\n'),
   ].join('\n\n') + '\n';
 }
 
-export function llmsFullTxt(projects: Project[], base: URL) {
+export function llmsFullTxt(projects: Project[], roles: Role[], base: URL) {
   return [
     `# ${site.brand} — ${site.name}`,
     `> ${site.description}`,
     `## About\n\n${aboutMarkdown()}`,
-    `## Now (updated ${now.updated})\n\n${now.items.map((i) => `- ${i.heading}: ${i.body}`).join('\n')}`,
+    `## Currently (updated ${now.updated})\n\n${currentlyMarkdown()}`,
+    `## Journey`,
+    ...roles.map(roleMarkdown),
     `## Projects`,
     ...projects.map((p) => projectMarkdown(p, base).replace(/^# /, '### ').replace(/\n## /g, '\n#### ')),
   ].join('\n\n');
@@ -95,7 +118,11 @@ export function projectsJson(projects: Project[], base: URL) {
 
 // ---- schema.org JSON-LD ----
 
-export function personLd(base: URL) {
+// Pass roles to list current employers alongside Leveluper.
+export function personLd(base: URL, roles: Role[] = []) {
+  const employers = roles
+    .filter((r) => !r.data.end && r.data.type !== 'Freelance')
+    .map((r) => ({ '@type': 'Organization', name: r.data.company, ...(r.data.companyUrl && { url: r.data.companyUrl }) }));
   return {
     '@type': 'Person',
     '@id': abs(base, '/#person'),
@@ -105,7 +132,7 @@ export function personLd(base: URL) {
     homeLocation: { '@type': 'Place', name: 'Algiers' },
     url: base.href,
     sameAs: realSocials().map((s) => s.href),
-    worksFor: { '@id': abs(base, '/#org') },
+    worksFor: [{ '@id': abs(base, '/#org') }, ...employers],
   };
 }
 

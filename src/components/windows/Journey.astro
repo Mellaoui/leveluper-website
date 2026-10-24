@@ -1,28 +1,115 @@
 ---
+import { render } from 'astro:content';
 import { now } from '../../data/site';
+import { getJourney, roleDates, roleDuration, roleLocation } from '../../data/journey';
+
+const roles = await Promise.all(
+  (await getJourney()).map(async (role) => ({ role, Content: (await render(role)).Content })),
+);
 ---
 
-<div class="now">
-  <p class="mono muted updated">Updated {now.updated}</p>
-  {now.items.map((item) => (
-    <div class="item">
-      <h2>{item.heading}</h2>
-      <p>{item.body}</p>
-    </div>
-  ))}
+<div class="journey">
+  <section class="currently" aria-label="Currently">
+    <p class="mono muted label">Currently · {now.updated}</p>
+    {now.items.map((item) => (
+      <p><strong>{item.heading}:</strong> {item.body}</p>
+    ))}
+  </section>
+
+  <ol class="timeline">
+    {roles.map(({ role, Content }) => {
+      const d = role.data;
+      return (
+        <li class:list={['role', { current: !d.end }]}>
+          <span class="dot" aria-hidden="true"></span>
+          <h2>{d.title}</h2>
+          <p class="company">
+            {d.companyUrl ? <a href={d.companyUrl}>{d.company}</a> : d.company}
+            <span class="muted"> · {d.type}</span>
+          </p>
+          <p class="mono muted meta">
+            {roleDates(role)} · {roleDuration(role)}<br />{roleLocation(role)}
+          </p>
+          <p class="summary">{d.summary}</p>
+          {d.tags.length > 0 && (
+            <ul class="tags" aria-label="Skills">
+              {d.tags.map((t) => <li class="mono">{t}</li>)}
+            </ul>
+          )}
+          {role.body?.trim() && (
+            <details>
+              <summary>Details</summary>
+              <div class="body"><Content /></div>
+            </details>
+          )}
+        </li>
+      );
+    })}
+  </ol>
 </div>
 
 <style>
-  .now {
+  .journey {
     padding: 22px 24px 26px;
     display: flex;
     flex-direction: column;
-    gap: 14px;
+    gap: 20px;
     font-size: 15px;
     line-height: 1.55;
   }
-  .updated { font-size: 12px; }
-  .item { display: flex; flex-direction: column; gap: 4px; }
-  h2 { margin: 0; font-size: 15px; font-weight: 600; }
   p { margin: 0; }
+  .label { font-size: 12px; margin-bottom: 4px; }
+  .currently {
+    padding: 12px 14px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: #fff;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .currently strong { font-weight: 600; }
+
+  .timeline { list-style: none; margin: 0; padding: 0; }
+  .role {
+    position: relative;
+    padding: 0 0 22px 22px;
+    border-left: 2px solid var(--line);
+    margin-left: 5px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .role:last-child { border-left-color: transparent; padding-bottom: 0; }
+  .dot {
+    position: absolute;
+    left: -7px;
+    top: 5px;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--paper);
+    border: 2px solid var(--line-strong);
+  }
+  .current .dot { background: var(--accent); border-color: var(--accent); }
+  h2 { margin: 0; font-size: 16px; font-weight: 600; line-height: 1.35; }
+  .company { font-size: 14px; }
+  .meta { font-size: 12px; line-height: 1.5; }
+  .summary { margin-top: 2px; }
+  .tags { list-style: none; margin: 4px 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px; }
+  .tags li {
+    font-size: 11.5px;
+    line-height: 1.4;
+    padding: 2px 8px;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background: #fff;
+    color: var(--muted);
+  }
+  details { margin-top: 4px; font-size: 14px; }
+  summary { cursor: pointer; color: var(--link); font-weight: 500; width: fit-content; }
+  summary:hover { color: var(--link-hover); }
+  summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 2px; }
+  .body :global(ul) { margin: 8px 0 0; padding-left: 18px; }
+  .body :global(li) { margin-bottom: 4px; }
 </style>

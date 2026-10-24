@@ -88,14 +88,12 @@ a:hover { color: var(--link-hover); }
 .dicon-tile {
   width: 48px;
   height: 48px;
-  border-radius: 10px;
-  background: var(--night-3);
-  border: 1px solid var(--night-line);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--accent);
+  filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.35));
 }
+.dicon { text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6); }
 
 /* ---- Windows ---- */
 .win {
@@ -104,7 +102,7 @@ a:hover { color: var(--link-hover); }
   top: var(--y);
   width: var(--w);
   max-width: calc(100% - 32px);
-  max-height: calc(100% - 120px);
+  max-height: calc(100% - var(--y) - 68px); /* stay above the taskbar */
   display: flex;
   flex-direction: column;
   background: var(--paper);
@@ -125,6 +123,11 @@ a:hover { color: var(--link-hover); }
   border-bottom: 1px solid var(--line);
 }
 .win.is-front .win-bar { background: var(--bar-front); }
+@media (min-width: 761px) {
+  .win-bar { user-select: none; touch-action: none; }
+}
+.win.is-dragging { box-shadow: 0 24px 56px rgba(0, 0, 0, 0.45); }
+.win.is-dragging .win-body { pointer-events: none; }
 .win-title { font-family: var(--font-mono); font-size: 13px; font-weight: 500; }
 .winbtn {
   width: 44px;
